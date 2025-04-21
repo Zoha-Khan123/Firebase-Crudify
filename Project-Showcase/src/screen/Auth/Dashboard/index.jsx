@@ -1,36 +1,38 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate  } from "react-router-dom";
-import { collection, onSnapshot, doc, deleteDoc } from "firebase/firestore";
-import { ToastContainer, toast } from "react-toastify"; 
+import { collection, onSnapshot, doc, deleteDoc , setDoc } from "firebase/firestore";
+import { toast } from "react-toastify"; 
 import "react-toastify/dist/ReactToastify.css"; 
-import { getAuth , signOut } from "firebase/auth";
+import { auth } from "../../../screen";
 import { db, Loader } from "../../../screen";
+
+
 const Dashboard = () => {
-
-
   // Logout
-  const auth = getAuth();
   const navigate = useNavigate();
   const [loader,setLoader] = useState(true)
 
-  const handleLogout = () => {
-    signOut(auth)
-      .then(() => {
-        toast.success("Logout Successfully")
-        setTimeout(()=>{
-          navigate("/login"); 
-        },1500)
+  const handleLogout = async () => {
+  try {
+    await auth.signOut()
+    window.location.href="/login"
+    console.log("User logout Successfully");
+     toast.success("User logout Successfully",{
+        position:"top-center",
       })
-      .catch((error) => {
-        toast.error(error.message); 
-      });
+    
+  } catch (error) {
+    console.log("Error logging out",error.message);
+     toast.error(error.message,{
+        position:"bottom-center",
+      })
+  }
   };
   
 
   // Add User
   const [addUser, setAddUser] = useState([]);
   
-
   useEffect(() => {
     const unsubscribe = onSnapshot(
       collection(db, "createUser"),
@@ -47,6 +49,11 @@ const Dashboard = () => {
 
     return () => unsubscribe();
   }, []);
+
+
+
+
+
 
 
   // Delete User

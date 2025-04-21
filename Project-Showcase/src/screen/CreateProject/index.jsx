@@ -1,4 +1,5 @@
 import React, {  useEffect, useState } from 'react'
+import { doc, setDoc } from "firebase/firestore"; 
 import { getAuth } from "firebase/auth";
 import { collection, addDoc } from "firebase/firestore";
 import { toast } from "react-toastify"; 
@@ -31,6 +32,7 @@ const CreateProject = () => {
       setUserId(user.uid)
 
   },[])
+
   
 
 // Add in database
@@ -45,7 +47,7 @@ const handleCreate = async (e) => {
   const { projectName, description, techStack, category, status, image } = formData;
 
   // Validation: Check if all required fields are filled
-  if (!projectName || !description || !techStack || !category || !status || !image || !date) {
+  if (!projectName || !description || !techStack || !category || !status || !image) {
     toast.error("Please fill all fields");
     return;
   }
@@ -70,14 +72,25 @@ const handleCreate = async (e) => {
        throw new Error("Image upload failed");
      }
 
-    // Save project data to Firestore
-    await addDoc(collection(db, "createUser"), {
-      ...formData,
-      uid:userId,
 
-      image: cloudinaryData.secure_url, // Save the Cloudinary image URL
-      createdAt: new Date(),
-    });
+
+      // Add a new document in collection "cities"
+      await setDoc(doc(db, "createUser", userId), {
+        ...formData,
+        uid:userId,
+  
+        image: cloudinaryData.secure_url, // Save the Cloudinary image URL
+        createdAt: new Date(),
+      });
+
+    // // Save project data to Firestore
+    // await addDoc(collection(db, "createUser"), {
+    //   ...formData,
+    //   uid:userId,
+
+    //   image: cloudinaryData.secure_url, // Save the Cloudinary image URL
+    //   createdAt: new Date(),
+    // });
     toast.success("Project added successfully!");
     setTimeout(() => {
       navigate("/dashboard");
